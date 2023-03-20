@@ -14,17 +14,21 @@ from schema import Optional, Schema, SchemaError
 from sensor import (
     CONF_API_KEY,
     CONF_DEPARTURES,
+    CONF_DIRECTION_ID,
+    CONF_ICON,
     CONF_ROUTE,
+    CONF_ROUTE_DELIMITER,
+    CONF_SERVICE_TYPE,
+    CONF_STOP_ID,
     CONF_TRIP_UPDATE_URL,
     CONF_VEHICLE_POSITION_URL,
+    CONF_X_API_KEY,
+    DEFAULT_DIRECTION,
+    DEFAULT_ICON,
+    DEFAULT_SERVICE,
     PublicTransportData,
     PublicTransportSensor,
 )
-
-""" These Constants are as of yet undefined in the main sensor.py
-CONF_DIRECTION_ID, CONF_ICON, CONF_ROUTE_DELIMITER, CONF_SERVICE_TYPE,
- CONF_STOP_ID, CONF_X_API_KEY, DEFAULT_DIRECTION,
- DEFAULT_ICON, DEFAULT_SERVICE,"""
 
 sys.path.append("lib")
 _LOGGER = logging.getLogger(__name__)

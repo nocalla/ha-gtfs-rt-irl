@@ -14,7 +14,7 @@ import requests
 import voluptuous as vol
 from google.transit import gtfs_realtime_pb2
 from homeassistant.components.sensor import PLATFORM_SCHEMA
-from homeassistant.const import ATTR_LATITUDE, ATTR_LONGITUDE
+from homeassistant.const import ATTR_LATITUDE, ATTR_LONGITUDE, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -49,6 +49,29 @@ ICON = "mdi:bus"
 MIN_TIME_BETWEEN_UPDATES = datetime.timedelta(seconds=60)
 TIME_STR_FORMAT = "%H:%M"
 
+""" These below constants are new additions
+CONF_DIRECTION_ID, CONF_ICON, CONF_ROUTE_DELIMITER, CONF_SERVICE_TYPE,
+CONF_STOP_ID, CONF_X_API_KEY, DEFAULT_DIRECTION,
+DEFAULT_ICON, DEFAULT_SERVICE,"""
+
+ATTR_STOP_ID = "Stop ID"
+ATTR_DIRECTION_ID = "Direction ID"
+ATTR_DUE_AT = "Due at"
+ATTR_NEXT_UP = "Next Service"
+ATTR_ICON = "Icon"
+
+CONF_X_API_KEY = "x_api_key"
+CONF_STOP_ID = "stopid"
+CONF_DIRECTION_ID = "directionid"
+CONF_ROUTE_DELIMITER = "route_delimiter"
+CONF_ICON = "icon"
+CONF_SERVICE_TYPE = "service_type"
+
+DEFAULT_SERVICE = "Service"
+DEFAULT_ICON = "mdi:bus"
+DEFAULT_DIRECTION = "0"
+
+
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_TRIP_UPDATE_URL): cv.string,
@@ -65,6 +88,32 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         ],
     }
 )
+# PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
+#     {
+#         vol.Required(CONF_TRIP_UPDATE_URL): cv.string,
+#         vol.Optional(CONF_API_KEY): cv.string,
+#         vol.Optional(CONF_X_API_KEY): cv.string,
+#         vol.Optional(CONF_VEHICLE_POSITION_URL): cv.string,
+#         vol.Optional(CONF_ROUTE_DELIMITER): cv.string,
+#         vol.Optional(CONF_DEPARTURES): [
+#             {
+#                 vol.Required(CONF_NAME): cv.string,
+#                 vol.Required(CONF_STOP_ID): cv.string,
+#                 vol.Required(CONF_ROUTE): cv.string,
+#                 vol.Optional(
+#                     CONF_DIRECTION_ID,
+#                     default=DEFAULT_DIRECTION,  # type: ignore
+#                 ): str,
+#                 vol.Optional(
+#                     CONF_ICON, default=DEFAULT_ICON  # type: ignore
+#                 ): cv.string,
+#                 vol.Optional(
+#                     CONF_SERVICE_TYPE, default=DEFAULT_SERVICE  # type: ignore
+#                 ): cv.string,
+#             }
+#         ],
+#     }
+# )
 
 
 def get_times(route_stops, gtfs_database_path, set_limit):
