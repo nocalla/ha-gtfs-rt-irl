@@ -1,4 +1,3 @@
-# pylint: disable=no-member, too-many-nested-blocks, consider-using-dict-items
 """Support for the GTFS Realtime Ireland service."""
 from __future__ import annotations
 
@@ -9,15 +8,14 @@ import sqlite3
 import time
 from typing import Any
 
-from google.transit import gtfs_realtime_pb2
+import homeassistant.helpers.config_validation as cv
 import pygtfs
 import requests
 import voluptuous as vol
-
+from google.transit import gtfs_realtime_pb2
 from homeassistant.components.sensor import PLATFORM_SCHEMA
 from homeassistant.const import ATTR_LATITUDE, ATTR_LONGITUDE
 from homeassistant.core import HomeAssistant
-import homeassistant.helpers.config_validation as cv
 from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
@@ -70,7 +68,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 
 
 def get_times(route_stops, gtfs_database_path, set_limit):
-    """Get the next departure times for today for each required/configured stop, route and operator."""
+    """Get the next departure times for today for each required/configured
+    stop, route and operator."""
 
     conn = sqlite3.connect(gtfs_database_path)
     ctrips = conn.cursor()
@@ -91,7 +90,8 @@ def get_times(route_stops, gtfs_database_path, set_limit):
         result = False
         today = datetime.datetime.today().weekday()
         cservice.execute(
-            "SELECT * from calendar WHERE service_id=:service", {"service": service_id}
+            "SELECT * from calendar WHERE service_id=:service",
+            {"service": service_id},
         )
         days_of_week = cservice.fetchone()
         today_flag = list(days_of_week)[today + 2]
@@ -110,7 +110,10 @@ def get_times(route_stops, gtfs_database_path, set_limit):
 
         if today_flag == 1 and validity:
             cexcp.execute(
-                "SELECT * from calendar_dates WHERE service_id=:service and date=:date",
+                (
+                    "SELECT * from calendar_dates WHERE service_id=:service"
+                    " and date=:date"
+                ),
                 {"service": service_id, "date": today_date2},
             )
             exception_date = cexcp.fetchone()
@@ -136,7 +139,10 @@ def get_times(route_stops, gtfs_database_path, set_limit):
         req_stop_id = stop_data[0]
 
         croutes.execute(
-            "SELECT agency_id, route_id from routes WHERE route_short_name=:route AND agency_id=:operator",
+            (
+                "SELECT agency_id, route_id from routes WHERE"
+                " route_short_name=:route AND agency_id=:operator"
+            ),
             {"route": req_route, "operator": req_operator},
         )
 
@@ -150,10 +156,12 @@ def get_times(route_stops, gtfs_database_path, set_limit):
             )
 
             for trip_id, service_id in ctrips.fetchall():
-
                 req_trip = trip_id
                 cstoptimes.execute(
-                    "SELECT arrival_time, departure_time, stop_id FROM stop_times WHERE trip_id=:trip AND stop_id=:stop",
+                    (
+                        "SELECT arrival_time, departure_time, stop_id FROM"
+                        " stop_times WHERE trip_id=:trip AND stop_id=:stop"
+                    ),
                     {"trip": req_trip, "stop": req_stop_id},
                 )
 
@@ -162,11 +170,15 @@ def get_times(route_stops, gtfs_database_path, set_limit):
                 if departure is not None:
                     dep_time_str = list(departure)[1]
 
-                    epoch_dep = int(time.mktime(time.strptime(dep_time_str, pattern)))
+                    epoch_dep = int(
+                        time.mktime(time.strptime(dep_time_str, pattern))
+                    )
 
                     now = datetime.datetime.now()
                     curr_time_str = now.strftime(pattern1)
-                    epoch_now = int(time.mktime(time.strptime(curr_time_str, pattern)))
+                    epoch_now = int(
+                        time.mktime(time.strptime(curr_time_str, pattern))
+                    )
 
                     if epoch_dep >= epoch_now:
                         diff = epoch_dep - epoch_now
@@ -200,7 +212,8 @@ def setup_platform(
     add_entities: AddEntitiesCallback,
     discovery_info: DiscoveryInfoType | None = None,
 ) -> None:
-    """Set up the GTFS Realtime sensor and load the database from the Zip file if needed."""
+    """Set up the GTFS Realtime sensor and load the database
+    from the Zip file if needed."""
 
     zip_file = str(config.get(CONF_ZIP_FILE))
     gtfs_dir = hass.config.path(DEFAULT_PATH)
@@ -224,7 +237,8 @@ def setup_platform(
             conn = sqlite3.connect(gtfs_database_path)
             cursor = conn.cursor()
             create_index = (
-                "CREATE INDEX index_stop_times_1 ON stop_times(trip_id, stop_id )"
+                "CREATE INDEX index_stop_times_1 ON stop_times(trip_id,"
+                " stop_id )"
             )
             cursor.execute(create_index)
             cursor.close()
@@ -243,7 +257,12 @@ def setup_platform(
         route_deps.append((stop_name, route, operator))
 
     data = PublicTransportData(
-        gtfs_database_path, trip_url, route_deps, vehicle_pos_url, api_key, set_limit
+        gtfs_database_path,
+        trip_url,
+        route_deps,
+        vehicle_pos_url,
+        api_key,
+        set_limit,
     )
 
     sensors = []
@@ -319,7 +338,8 @@ class PublicTransportSensor(Entity):
         return ICON
 
     def update(self) -> None:
-        """Get the latest data from the static schedule data, realtime feed and update the states."""
+        """Get the latest data from the static schedule data, realtime feed
+        and update the states."""
         self.data.update()
 
 
@@ -352,14 +372,17 @@ class PublicTransportData:
     @Throttle(MIN_TIME_BETWEEN_UPDATES)
     def update(self):
         """Update for the data object."""
-        positions = self._get_vehicle_positions() if self._vehicle_position_url else {}
+        positions = (
+            self._get_vehicle_positions() if self._vehicle_position_url else {}
+        )
         self._update_route_statuses(positions)
 
     def _update_route_statuses(self, vehicle_positions):
         """Get the latest data."""
 
         class StopDetails:
-            """Stop times object list.  Position is not implemented - future."""
+            """Stop times object list.
+            Position is not implemented - future."""
 
             def __init__(self, arrival_time, position, dep_time):
                 self.arrival_time = arrival_time
@@ -376,7 +399,8 @@ class PublicTransportData:
         )
         if response.status_code != 200:
             _LOGGER.error(
-                "Updating route status got  {response.status_code}:{response.content}"
+                "Updating route status got "
+                " {response.status_code}:{response.content}"
             )
 
         feed.ParseFromString(response.content)
@@ -414,19 +438,21 @@ class PublicTransportData:
         # Sort by arrival time
         for route_no in departure_times:
             for stop_name in departure_times[route_no]:
-                departure_times[route_no][stop_name].sort(key=lambda t: t.arrival_time)
+                departure_times[route_no][stop_name].sort(
+                    key=lambda t: t.arrival_time
+                )
 
         self.info = departure_times
 
     def _get_vehicle_positions(self):
-
         feed = gtfs_realtime_pb2.FeedMessage()
         response = requests.get(
             self._vehicle_position_url, headers=self._headers, timeout=60
         )
         if response.status_code != 200:
             _LOGGER.error(
-                "Updating vehicle positions got {response.status_code}:{response.content}"
+                "Updating vehicle positions got"
+                " {response.status_code}:{response.content}"
             )
         feed.ParseFromString(response.content)
         positions = {}
