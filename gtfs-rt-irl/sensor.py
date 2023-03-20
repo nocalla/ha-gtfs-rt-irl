@@ -351,7 +351,7 @@ class PublicTransportData:
         gtfs_database_path,
         trip_url,
         route_deps,
-        vehicle_position_url=None,
+        vehicle_position_url="",
         api_key=None,
         set_limit=0,
     ):
@@ -373,7 +373,9 @@ class PublicTransportData:
     def update(self):
         """Update for the data object."""
         positions = (
-            self._get_vehicle_positions() if self._vehicle_position_url else {}
+            self._get_vehicle_positions()
+            if self._vehicle_position_url != ""
+            else {}
         )
         self._update_route_statuses(positions)
 
