@@ -39,17 +39,17 @@ PLATFORM_SCHEMA = Schema(
     {
         CONF_TRIP_UPDATE_URL: str,
         Optional(CONF_API_KEY): str,
-        # Optional(CONF_X_API_KEY): str,
+        Optional(CONF_X_API_KEY): str,
         Optional(CONF_VEHICLE_POSITION_URL): str,
-        # Optional(CONF_ROUTE_DELIMITER): str,
+        Optional(CONF_ROUTE_DELIMITER): str,
         CONF_DEPARTURES: [
             {
                 CONF_NAME: str,
-                # CONF_STOP_ID: str,
+                CONF_STOP_ID: str,
                 CONF_ROUTE: str,
-                # Optional(CONF_DIRECTION_ID): str,
-                # Optional(CONF_SERVICE_TYPE): str,
-                # Optional(CONF_ICON): str,
+                Optional(CONF_DIRECTION_ID): str,
+                Optional(CONF_SERVICE_TYPE): str,
+                Optional(CONF_ICON): str,
             }
         ],
     }

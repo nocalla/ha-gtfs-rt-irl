@@ -76,44 +76,34 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_TRIP_UPDATE_URL): cv.string,
         vol.Required(CONF_API_KEY): cv.string,
+        vol.Optional(CONF_X_API_KEY): cv.string,  # new
         vol.Required(CONF_ZIP_FILE): cv.string,
-        vol.Optional(CONF_LIMIT, default=30): vol.Coerce(int),  # type: ignore
+        vol.Optional(CONF_LIMIT, default=30): vol.Coerce(int),  # type: ignore # what is this limiting?
         vol.Optional(CONF_VEHICLE_POSITION_URL): cv.string,
+        vol.Optional(CONF_ROUTE_DELIMITER): cv.string,  # new
         vol.Optional(CONF_DEPARTURES): [
             {
-                vol.Required(CONF_STOP_NAME): cv.string,
+                vol.Required(CONF_NAME): cv.string,
+                vol.Required(CONF_STOP_NAME): cv.string,  # remove?
+                vol.Required(CONF_STOP_ID): cv.string,  # new
                 vol.Required(CONF_ROUTE): cv.string,
-                vol.Required(CONF_OPERATOR): cv.string,
+                vol.Required(
+                    CONF_OPERATOR
+                ): cv.string,  # remove (not required in new API)
+                vol.Optional(
+                    CONF_DIRECTION_ID,
+                    default=DEFAULT_DIRECTION,  # type: ignore
+                ): str,  # new
+                vol.Optional(
+                    CONF_ICON, default=DEFAULT_ICON  # type: ignore
+                ): cv.string,  # new
+                vol.Optional(
+                    CONF_SERVICE_TYPE, default=DEFAULT_SERVICE  # type: ignore
+                ): cv.string,  # new
             }
         ],
     }
 )
-# PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-#     {
-#         vol.Required(CONF_TRIP_UPDATE_URL): cv.string,
-#         vol.Optional(CONF_API_KEY): cv.string,
-#         vol.Optional(CONF_X_API_KEY): cv.string,
-#         vol.Optional(CONF_VEHICLE_POSITION_URL): cv.string,
-#         vol.Optional(CONF_ROUTE_DELIMITER): cv.string,
-#         vol.Optional(CONF_DEPARTURES): [
-#             {
-#                 vol.Required(CONF_NAME): cv.string,
-#                 vol.Required(CONF_STOP_ID): cv.string,
-#                 vol.Required(CONF_ROUTE): cv.string,
-#                 vol.Optional(
-#                     CONF_DIRECTION_ID,
-#                     default=DEFAULT_DIRECTION,  # type: ignore
-#                 ): str,
-#                 vol.Optional(
-#                     CONF_ICON, default=DEFAULT_ICON  # type: ignore
-#                 ): cv.string,
-#                 vol.Optional(
-#                     CONF_SERVICE_TYPE, default=DEFAULT_SERVICE  # type: ignore
-#                 ): cv.string,
-#             }
-#         ],
-#     }
-# )
 
 
 def get_times(route_stops, gtfs_database_path, set_limit):
