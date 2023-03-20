@@ -54,7 +54,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
         vol.Required(CONF_TRIP_UPDATE_URL): cv.string,
         vol.Required(CONF_API_KEY): cv.string,
         vol.Required(CONF_ZIP_FILE): cv.string,
-        vol.Optional(CONF_LIMIT, default=30): vol.Coerce(int),
+        vol.Optional(CONF_LIMIT, default=30): vol.Coerce(int),  # type: ignore
         vol.Optional(CONF_VEHICLE_POSITION_URL): cv.string,
         vol.Optional(CONF_DEPARTURES): [
             {
@@ -232,7 +232,7 @@ def setup_platform(
         gtfs_load_path = os.path.join(gtfs_dir, sqlite_file)
 
         gtfs = pygtfs.Schedule(gtfs_load_path)
-        if not gtfs.feeds:
+        if not gtfs.feeds:  # type: ignore
             pygtfs.append_feed(gtfs, os.path.join(gtfs_dir, zip_file))
             conn = sqlite3.connect(gtfs_database_path)
             cursor = conn.cursor()
@@ -244,9 +244,9 @@ def setup_platform(
             cursor.close()
 
     trip_url = config.get(CONF_TRIP_UPDATE_URL)
-    vehicle_pos_url = config.get(CONF_VEHICLE_POSITION_URL)
+    vehicle_pos_url = str(config.get(CONF_VEHICLE_POSITION_URL))
     api_key = config.get(CONF_API_KEY)
-    set_limit: int | None = config.get(CONF_LIMIT)
+    set_limit = config.get(CONF_LIMIT)
 
     route_deps = []
 
@@ -262,7 +262,7 @@ def setup_platform(
         route_deps,
         vehicle_pos_url,
         api_key,
-        set_limit,
+        set_limit,  # type: ignore
     )
 
     sensors = []
@@ -395,7 +395,7 @@ class PublicTransportData:
             self._route_deps, self._gtfs_database_path, self._set_limit
         )
 
-        feed = gtfs_realtime_pb2.FeedMessage()
+        feed = gtfs_realtime_pb2.FeedMessage()  # type: ignore
         response = requests.get(
             self._trip_update_url, headers=self._headers, timeout=30
         )
@@ -447,7 +447,7 @@ class PublicTransportData:
         self.info = departure_times
 
     def _get_vehicle_positions(self):
-        feed = gtfs_realtime_pb2.FeedMessage()
+        feed = gtfs_realtime_pb2.FeedMessage()  # type: ignore
         response = requests.get(
             self._vehicle_position_url, headers=self._headers, timeout=60
         )
